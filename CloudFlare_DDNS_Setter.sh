@@ -82,21 +82,25 @@ choose_service(){
 		echo -e "${Info} if you want a automatic ddns, firstly you should get record_id"
 		echo -e "${Info} alternatively you can use this script to create a A record and get its id"
 		echo -e "${Info} now select required service:\n1.get domain record_id\n2.create a new domain A record\n3.configure lightsail if necessary"
-		read -p "(input 1~3 to select):" service
-		while [[ ! "${service}" =~ ^[1-3]$ ]]
+		read -p "(input 1~4 to select):" service
+		while [[ ! "${service}" =~ ^[1-4]$ ]]
 		do
 			echo -e "${Error} invalid input !"
-			read -p "(input 1~3 to select):" service
+			read -p "(input 1~4 to select):" service
 		done
 		[[ "${service}" = "1" ]] && get_record_id
         sed -i '/CloudFlare_DDNS/d' /var/spool/cron/root
         echo -e '*/3 * * * * bash CloudFlare_DDNS_Setter.sh --ddns' >> /var/spool/cron/root
 		[[ "${service}" = "2" ]] && create_record
         [[ "${service}" = "3" ]] && Lightsail_conf
+	[[ "${service}" = "4" ]] && Azure_conf
 
 	elif [[ "$1" == "--ddns" ]]; then
         if [[ $lightsail_switch == "true" ]]; then
             lightsail_change_ip
+        fi
+	if [[ $azure_switch == "true" ]]; then
+            azure_change_ip
         fi
         check_ip_diff
 		echo -e "${Info} now will start automatically ddns record updating service"
@@ -187,6 +191,52 @@ lightsail_change_ip(){
     fi
 }
 
+Azure_conf(){
+    pip install awscli --upgrade
+    clear
+    echo -e '''
+   ===============================
+    北美: us-east-1 弗吉尼亚州
+          us-east-2 俄亥俄州
+          us-west-2 俄勒冈州
+          ca-central-1 加拿大
+    欧洲: eu-west-1 爱尔兰
+          eu-west-2 英国
+          eu-west-3 法国
+          eu-central-1 德国
+    亚洲: ap-northeast-1 日本
+          ap-northeast-2 韩国
+          ap-southeast-1 新加坡
+          ap-southeast-2 澳大利亚
+          ap-south-1 印度
+   ===============================
+    '''
+    aws configure #输入AWSAccessKeyId和AWSSecretKey以及本机地域,第四项留空，Key由 https://console.aws.amazon.com/iam/home#/security_credential 申请
+}
+
+azure_change_ip(){
+    #检查本机ip是否被tcp阻断
+    tcp_status=`curl --silent https://ping.regend.xyz/${local_ip}/22 | jq .status`
+    if [[ $tcp_status == "false" ]]; then
+        tcp_count=0
+        while [[ $tcp_count -lt $check_times ]]
+        do
+            #如果false则多次检查确认,无true记录的话,更换ip,默认值4次
+            tcp_status=`curl --silent https://ping.regend.xyz/${local_ip}/22 | jq .status`
+            [[ $tcp_status == "true" ]] && exit 0
+            tcp_count=`expr ${tcp_count} + 1`
+            sleep 2s
+        done
+    # 删除现有静态IP
+    aws lightsail release-static-ip --static-ip-name ${lightsail_ipname} >/dev/null 2>&1
+    # 创建新IP
+    aws lightsail allocate-static-ip --static-ip-name ${lightsail_ipname} >/dev/null 2>&1
+    # 绑定IP
+    aws lightsail attach-static-ip --static-ip-name ${lightsail_ipname} --instance-name ${lightsail_instance} >/dev/null 2>&1
+    #待机15s以确保ip更换完毕
+    sleep 15s
+    fi
+}
 
 check_root
 check_system

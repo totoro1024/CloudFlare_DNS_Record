@@ -192,26 +192,18 @@ lightsail_change_ip(){
 }
 
 Azure_conf(){
-    pip install awscli --upgrade
+    sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+    
+    sudo sh -c 'echo -e "[azure-cli]
+    name=Azure CLI
+    baseurl=https://packages.microsoft.com/yumrepos/azure-cli
+    enabled=1
+    gpgcheck=1
+    gpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azure-cli.repo'
+
+    sudo yum install azure-cli
     clear
-    echo -e '''
-   ===============================
-    北美: us-east-1 弗吉尼亚州
-          us-east-2 俄亥俄州
-          us-west-2 俄勒冈州
-          ca-central-1 加拿大
-    欧洲: eu-west-1 爱尔兰
-          eu-west-2 英国
-          eu-west-3 法国
-          eu-central-1 德国
-    亚洲: ap-northeast-1 日本
-          ap-northeast-2 韩国
-          ap-southeast-1 新加坡
-          ap-southeast-2 澳大利亚
-          ap-south-1 印度
-   ===============================
-    '''
-    aws configure #输入AWSAccessKeyId和AWSSecretKey以及本机地域,第四项留空，Key由 https://console.aws.amazon.com/iam/home#/security_credential 申请
+    az login
 }
 
 azure_change_ip(){
@@ -227,12 +219,8 @@ azure_change_ip(){
             tcp_count=`expr ${tcp_count} + 1`
             sleep 2s
         done
-    # 删除现有静态IP
-    aws lightsail release-static-ip --static-ip-name ${lightsail_ipname} >/dev/null 2>&1
-    # 创建新IP
-    aws lightsail allocate-static-ip --static-ip-name ${lightsail_ipname} >/dev/null 2>&1
-    # 绑定IP
-    aws lightsail attach-static-ip --static-ip-name ${lightsail_ipname} --instance-name ${lightsail_instance} >/dev/null 2>&1
+    # 停止分配 VM && 启动 VM
+    az vm deallocate -g ${azure_name} -n ${azure_vmname} && az vm start -g ${azure_name} -n ${azure_vmname}
     #待机15s以确保ip更换完毕
     sleep 15s
     fi

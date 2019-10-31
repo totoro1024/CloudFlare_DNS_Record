@@ -81,7 +81,7 @@ choose_service(){
 	if [[ -z "$1" ]]; then
 		echo -e "${Info} if you want a automatic ddns, firstly you should get record_id"
 		echo -e "${Info} alternatively you can use this script to create a A record and get its id"
-		echo -e "${Info} now select required service:\n1.get domain record_id\n2.create a new domain A record\n3.configure lightsail if necessary"
+		echo -e "${Info} now select required service:\n1.get domain record_id\n2.create a new domain A record\n3.configure lightsail if necessary\n3.configure azure if necessary"
 		read -p "(input 1~4 to select):" service
 		while [[ ! "${service}" =~ ^[1-4]$ ]]
 		do
@@ -192,15 +192,6 @@ lightsail_change_ip(){
 }
 
 Azure_conf(){
-    sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
-    
-    sudo sh -c 'echo -e "[azure-cli]
-    name=Azure CLI
-    baseurl=https://packages.microsoft.com/yumrepos/azure-cli
-    enabled=1
-    gpgcheck=1
-    gpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azure-cli.repo'
-
     sudo yum install azure-cli
     clear
     az login

@@ -169,13 +169,13 @@ Lightsail_conf(){
 
 lightsail_change_ip(){
     #检查本机ip是否被tcp阻断
-    tcp_status=`curl --silent https://ping.regend.xyz/${local_ip}/22 | jq .status`
+    tcp_status=`curl --silent http://xz-cu1.cloudiplc.com:30001/${local_ip}/443 | jq .status`
     if [[ $tcp_status == "false" ]]; then
         tcp_count=0
         while [[ $tcp_count -lt $check_times ]]
         do
             #如果false则多次检查确认,无true记录的话,更换ip,默认值4次
-            tcp_status=`curl --silent https://ping.regend.xyz/${local_ip}/22 | jq .status`
+            tcp_status=`curl --silent http://xz-cu1.cloudiplc.com:30001/${local_ip}/443 | jq .status`
             [[ $tcp_status == "true" ]] && exit 0
             tcp_count=`expr ${tcp_count} + 1`
             sleep 2s
@@ -199,13 +199,13 @@ Azure_conf(){
 
 azure_change_ip(){
     #检查本机ip是否被tcp阻断
-    tcp_status=`curl --silent https://ping.regend.xyz/${local_ip}/22 | jq .status`
+    tcp_status=`curl --silent http://xz-cu1.cloudiplc.com:30001/${local_ip}/443 | jq .status`
     if [[ $tcp_status == "false" ]]; then
         tcp_count=0
         while [[ $tcp_count -lt $check_times ]]
         do
             #如果false则多次检查确认,无true记录的话,更换ip,默认值4次
-            tcp_status=`curl --silent https://ping.regend.xyz/${local_ip}/22 | jq .status`
+            tcp_status=`curl --silent http://xz-cu1.cloudiplc.com:30001/${local_ip}/443 | jq .status`
             [[ $tcp_status == "true" ]] && exit 0
             tcp_count=`expr ${tcp_count} + 1`
             sleep 2s

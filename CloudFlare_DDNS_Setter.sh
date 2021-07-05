@@ -69,7 +69,7 @@ define(){
 	domain=`cat ${ddns_conf} | grep "domain" | awk -F "[ =]" '{print $2}'`
 	ttl=`cat ${ddns_conf} | grep "ttl" | awk -F "[ =]" '{print $2}'`
 
-    local_ip=`curl ipv4.ip.sb`
+    local_ip=`curl -4 ip.sb`
 
     lightsail_switch=`cat ${ddns_conf} | grep "lightsail_switch" | awk -F "[ =]" '{print $2}'`
     lightsail_ipname=`cat ${ddns_conf} | grep "lightsail_ipname" | awk -F "[ =]" '{print $2}'`

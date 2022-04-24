@@ -171,7 +171,7 @@ lightsail_change_ip(){
     #检查本机ip是否被tcp阻断
     tcp_status=`curl --silent --connect-timeout 5 http://106.13.22.113:10535/ping/${local_ip}/11443 | jq .status`
     echo -e "tcp_status=${tcp_status}"
-    if [[ $tcp_status == "false" ]]; then
+    if [[ $tcp_status == "false" || $tcp_status == "" ]]; then
         tcp_count=0
         while [[ $tcp_count -lt $check_times ]]
         do

@@ -169,14 +169,14 @@ Lightsail_conf(){
 
 lightsail_change_ip(){
     #检查本机ip是否被tcp阻断
-    tcp_status=`curl --silent --connect-timeout 5 http://106.13.22.113:10535/ping/${local_ip}/11443 | jq .status`
+    tcp_status=`curl --silent --connect-timeout 5 http://47.104.20.99:10535/ping/${local_ip}/11443 | jq .status`
     echo -e "tcp_status=${tcp_status}"
     if [[ $tcp_status != "true" ]]; then
         tcp_count=0
         while [[ $tcp_count -lt $check_times ]]
         do
             #如果false则多次检查确认,无true记录的话,更换ip,默认值4次
-            tcp_status=`curl --silent --connect-timeout 5 http://106.13.22.113:10535/ping/${local_ip}/11443 | jq .status`
+            tcp_status=`curl --silent --connect-timeout 5 http://47.104.20.99:10535/ping/${local_ip}/11443 | jq .status`
             [[ $tcp_status == "true" ]] && exit 0
             tcp_count=`expr ${tcp_count} + 1`
             sleep 2s
@@ -200,13 +200,13 @@ Azure_conf(){
 
 azure_change_ip(){
     #检查本机ip是否被tcp阻断
-    tcp_status=`curl --silent http://106.13.22.113:10535/ping/${local_ip}/11443 | jq .status`
+    tcp_status=`curl --silent http://47.104.20.99:10535/ping/${local_ip}/11443 | jq .status`
     if [[ $tcp_status == "false" ]]; then
         tcp_count=0
         while [[ $tcp_count -lt $check_times ]]
         do
             #如果false则多次检查确认,无true记录的话,更换ip,默认值4次
-            tcp_status=`curl --silent http://106.13.22.113:10535/ping/${local_ip}/11443 | jq .status`
+            tcp_status=`curl --silent http://47.104.20.99:10535/ping/${local_ip}/11443 | jq .status`
             [[ $tcp_status == "true" ]] && exit 0
             tcp_count=`expr ${tcp_count} + 1`
             sleep 2s
